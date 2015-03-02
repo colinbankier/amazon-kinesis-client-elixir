@@ -5,9 +5,10 @@ defmodule KCLProcessTest do
         input_specs = [
           %{:method => :init_processor, :action => "initialize", :input => ~s({"action":"initialize","shardId":"shard-000001"})},
           %{:method => :process_records, :action => "processRecords", :input => ~s({"action":"processRecords","records":[]})},
-          %{:method => :shutdown, :action => "shutdown", :input => ~s("action":"shutdown","reason":"TERMINATE"})},
+          %{:method => :shutdown, :action => "shutdown", :input => ~s({"action":"shutdown","reason":"TERMINATE"})},
         ]
         # pick any of the actions randomly to avoid writing a test for each
+        :random.seed(:os.timestamp)
         input_spec = input_specs |> Enum.shuffle |> List.first
         processor = KCLEx.RecordProcessor
         {:ok, input} = StringIO.open(input_spec[:input])
@@ -16,8 +17,14 @@ defmodule KCLProcessTest do
         KCLProcess.run(processor, input, output, error)
 
         expected_output = ~s([{"action":"status","responseFor":"#{input_spec[:action]}"}])
-        assert String.replace(IO.read(output, :all), ~r/\s+/, "") == String.replace(expected_output, ~r/\s+/, "")
-        assert IO.read(error, :all) == ""
+        assert String.replace(content(output), ~r/\s+/, "") ==
+          String.replace(expected_output, ~r/\s+/, "")
+        assert content(error) == ""
         assert IO.read(input, 1) == :eof
+  end
+
+  def content stringio do
+    {_, content} = StringIO.contents(stringio)
+    content
   end
 end

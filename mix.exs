@@ -25,6 +25,8 @@ defmodule Kclex.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [
+      { :exjsx, github: "talentdeficit/exjsx" },
+    ]
   end
 end

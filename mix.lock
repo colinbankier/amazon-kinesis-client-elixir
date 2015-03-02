@@ -1,0 +1,2 @@
+%{"exjsx": {:git, "git://github.com/talentdeficit/jsex.git", "d3572b488f10e3b83fadb1fc595fc87f84c35809", []},
+  "jsx": {:hex, :jsx, "2.4.0"}}
