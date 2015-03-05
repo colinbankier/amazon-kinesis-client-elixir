@@ -4,15 +4,18 @@ defmodule KCLProcessTest do
   defmodule TestRecordProcessor do
     import RecordProcessor
 
-    def process_records(records, output) do
+    def process_records([], _), do: nil
+    def process_records(records, input, output) do
       seq = records |> List.first |> Map.get "sequencenumber"
-      case checkpoint(output, seq) do
+      case checkpoint(input, output, seq) do
         :ok -> nil
-        {:error, "throttlingexception"} -> checkpoint(output, seq)
+        {:error, "ThrottlingException"} -> checkpoint(input, output, seq)
       end
     end
-    def init_processor(arg), do: IO.puts "init processor"
-    def shutdown(arg), do: IO.puts "shutdown"
+
+    def init_processor(arg, output), do: IO.puts "init processor"
+    def shutdown("TERMINATE", input, output), do: checkpoint(input, output, nil)
+    def shutdown(_, _, _), do: nil
   end
 
   test "It should respond to each action and output a status message" do

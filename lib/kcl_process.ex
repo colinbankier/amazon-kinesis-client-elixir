@@ -12,22 +12,22 @@ defmodule KCLProcess do
     {:ok, action} = line |> IO.inspect |> JSX.decode
     case Map.get(action, "action") do
       "initialize" ->
-        dispatch(processor, :init_processor, Map.get(action, "shardId"))
+        dispatch(processor, :init_processor, [Map.get(action, "shardId"), output])
       "processRecords" ->
-        dispatch(processor, :process_records, Map.get(action, "records"))
+        dispatch(processor, :process_records, [Map.get(action, "records"), input, output])
       "shutdown" ->
-        dispatch(processor, :shutdown, Map.get(action, "reason"))
+        dispatch(processor, :shutdown, [Map.get(action, "reason"), input, output])
       :else -> raise "Malformed Action"
     end
     IO.puts(output, response(action))
     read(processor, input, output, error)
   end
 
-  defp dispatch(processor, function_name, arg) do
-    apply(processor, function_name, [arg])
+  defp dispatch(processor, function_name, args) do
+    apply(processor, function_name, args)
   end
 
-  defp response action = %{"action" => action} do
-    ~s({"action":"status","responseFor":"#{action["action"]}"})
+  defp response(action = %{"action" => action_value}) do
+    ~s({"action":"status","responseFor":"#{action_value}"})
   end
 end
