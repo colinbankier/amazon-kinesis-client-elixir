@@ -4,9 +4,8 @@ defmodule KCLProcessTest do
   defmodule TestRecordProcessor do
     import RecordProcessor
 
-    def process_records([], _), do: nil
     def process_records(records, input, output) do
-      seq = records |> List.first |> Map.get "sequencenumber"
+      seq = records |> List.first |> Map.get "sequenceNumber"
       case checkpoint(input, output, seq) do
         :ok -> nil
         {:error, "ThrottlingException"} -> checkpoint(input, output, seq)
@@ -27,7 +26,7 @@ defmodule KCLProcessTest do
         # pick any of the actions randomly to avoid writing a test for each
         :random.seed(:os.timestamp)
         input_spec = input_specs |> Enum.shuffle |> List.first
-        processor = TestRecordProcessor
+        processor = RecordProcessor
         {:ok, input} = StringIO.open(input_spec[:input])
         {:ok, output} = StringIO.open ""
         {:ok, error} = StringIO.open ""
@@ -69,7 +68,7 @@ defmodule KCLProcessTest do
     # outputs should be same modulo some whitespaces
     assert clean(content(output)) == clean(expected_output_string)
     assert content(error) == ""
-    assert IO.read(input, :all) == :eof
+    assert IO.read(input, 1) == :eof
   end
 
   def clean string do
