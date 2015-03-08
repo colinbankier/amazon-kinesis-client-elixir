@@ -1,6 +1,48 @@
 defmodule KCLProcessTest do
   use ExUnit.Case
 
+  test "It should respond to init_processor and output a status message" do
+        input_spec = %{
+          :method => :init_processor,
+          :action => "initialize",
+          :input => ~s({"action":"initialize","shardId":"shard-000001"})
+        }
+        {input, output, error} = open_io(input_spec[:input])
+
+        KCLProcess.run(RecordProcessor, input, output, error)
+
+        ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
+        |> assert_io input, output, error
+  end
+
+  test "It should respond to process_shards and output a status message" do
+        input_spec = %{
+          :method => :process_records,
+          :action => "processRecords",
+          :input => ~s({"action":"processRecords","records":[]})
+        }
+        {input, output, error} = open_io(input_spec[:input])
+
+        KCLProcess.run(RecordProcessor, input, output, error)
+
+        ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
+        |> assert_io input, output, error
+  end
+
+  test "It should respond to shutdown and output a status message" do
+        input_spec = %{
+          :method => :shutdown,
+          :action => "shutdown",
+          :input => ~s({"action":"shutdown","reason":"TERMINATE"})
+        }
+        {input, output, error} = open_io(input_spec[:input])
+
+        KCLProcess.run(RecordProcessor, input, output, error)
+
+        ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
+        |> assert_io input, output, error
+  end
+
   defmodule TestRecordProcessor do
     import RecordProcessor
 
@@ -12,30 +54,9 @@ defmodule KCLProcessTest do
       end
     end
 
-    def init_processor(arg, output), do: IO.puts "init processor"
+    def init_processor(arg, output), do: nil
     def shutdown("TERMINATE", input, output), do: checkpoint(input, output, nil)
     def shutdown(_, _, _), do: nil
-  end
-
-  test "It should respond to each action and output a status message" do
-        input_specs = [
-          %{:method => :init_processor, :action => "initialize", :input => ~s({"action":"initialize","shardId":"shard-000001"})},
-          %{:method => :process_records, :action => "processRecords", :input => ~s({"action":"processRecords","records":[]})},
-          %{:method => :shutdown, :action => "shutdown", :input => ~s({"action":"shutdown","reason":"TERMINATE"})},
-        ]
-        # pick any of the actions randomly to avoid writing a test for each
-        :random.seed(:os.timestamp)
-        input_spec = input_specs |> Enum.shuffle |> List.first
-        processor = RecordProcessor
-        {:ok, input} = StringIO.open(input_spec[:input])
-        {:ok, output} = StringIO.open ""
-        {:ok, error} = StringIO.open ""
-        KCLProcess.run(processor, input, output, error)
-
-        expected_output = ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
-        assert clean(content(output)) == clean(expected_output)
-        assert content(error) == ""
-        assert IO.read(input, 1) == :eof
   end
 
   test "It should process a normal stream of actions and produce expected output" do
@@ -48,6 +69,10 @@ defmodule KCLProcessTest do
     {"action":"checkpoint","checkpoint":"456"}
     """
 
+    {input, output, error} = open_io input_string
+
+    KCLProcess.run(TestRecordProcessor, input, output, error)
+
     # NOTE: The first checkpoint is expected to fail
     #       with a ThrottlingException and hence the
     #       retry.
@@ -59,16 +84,20 @@ defmodule KCLProcessTest do
     {"action":"checkpoint","checkpoint":null}
     {"action":"status","responseFor":"shutdown"}
     """
-    processor = TestRecordProcessor
-    {:ok, input} = StringIO.open(input_string)
-    {:ok, output} = StringIO.open ""
-    {:ok, error} = StringIO.open ""
-    KCLProcess.run(processor, input, output, error)
+    assert_io expected_output_string, input, output, error
+  end
 
-    # outputs should be same modulo some whitespaces
-    assert clean(content(output)) == clean(expected_output_string)
+  def assert_io expected_output, input, output, error do
+    assert clean(content(output)) == clean(expected_output)
     assert content(error) == ""
     assert IO.read(input, 1) == :eof
+  end
+
+  def open_io input_content do
+    {:ok, input} = StringIO.open(input_content)
+    {:ok, output} = StringIO.open ""
+    {:ok, error} = StringIO.open ""
+    {input, output, error}
   end
 
   def clean string do

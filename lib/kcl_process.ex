@@ -9,7 +9,7 @@ defmodule KCLProcess do
 
   defp process_line(:eof, _processor, _input, _output, _error), do: nil
   defp process_line line, processor, input, output, error do
-    {:ok, action} = line |> IO.inspect |> JSX.decode
+    {:ok, action} = line |> JSX.decode
     case Map.get(action, "action") do
       "initialize" ->
         dispatch(processor, :init_processor, [Map.get(action, "shardId"), output])

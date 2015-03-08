@@ -1,13 +1,13 @@
 defmodule RecordProcessor do
   def init_processor(_, _), do: nil
-
-  def process_records(_, _), do: nil
   def process_records(_, _, _), do: nil
-
   def shutdown(_, _, _), do: nil
-  defoverridable [process_records: 3]
-  defoverridable [process_records: 2]
-  defoverridable [shutdown: 3]
+
+  defoverridable [
+    init_processor: 2,
+    process_records: 3,
+    shutdown: 3
+  ]
 
   def checkpoint input, output, seq do
     IO.puts(output, checkpoint_response(seq))
