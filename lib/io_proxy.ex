@@ -8,8 +8,15 @@ defmodule IOProxy do
     do_read input
   end
 
+  def write_action(action_name, properties = %{}) do
+    {:ok, json} = Map.put(properties, "action", action_name)
+    |> JSX.encode
+    {_, output, _} = current_state
+    IO.puts output, json
+  end
+
   def write_error(message) do
-    {_, error, _} = current_state
+    {_, _, error} = current_state
     IO.puts error, error_string(message)
   end
 
