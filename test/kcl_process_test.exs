@@ -1,5 +1,6 @@
 defmodule KCLProcessTest do
   use ExUnit.Case
+  import TestHelper
 
   test "It should respond to init_processor and output a status message" do
         input_spec = %{
@@ -93,19 +94,7 @@ defmodule KCLProcessTest do
     assert IO.read(input, 1) == :eof
   end
 
-  def open_io input_content do
-    {:ok, input} = StringIO.open(input_content)
-    {:ok, output} = StringIO.open ""
-    {:ok, error} = StringIO.open ""
-    {input, output, error}
-  end
-
   def clean string do
     String.replace string, ~r/\s+/, ""
-  end
-
-  def content stringio do
-    {_, content} = StringIO.contents(stringio)
-    content
   end
 end
