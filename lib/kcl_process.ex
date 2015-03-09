@@ -1,33 +1,36 @@
 defmodule KCLProcess do
-  def run(processor, input, output, error) do
-    read(processor, input, output, error)
+  def initialize(processor_module, input, output, error) do
+    IOProxy.initialize({input, output, error})
+    Agent.start_link(fn -> processor_module end, name: __MODULE__)
   end
 
-  defp read(processor, input, output, error) do
-    IO.read(input, :line) |> process_line(processor, input, output, error)
+  def run do
+    read
   end
 
-  defp process_line(:eof, _processor, _input, _output, _error), do: nil
-  defp process_line line, processor, input, output, error do
+  defp processor do
+    Agent.get(__MODULE__, &(&1))
+  end
+
+  defp read do
+    IOProxy.read_line |> process_line
+  end
+
+  defp process_line(nil), do: nil
+  defp process_line(line) do
+    IO.inspect line
     {:ok, action} = line |> JSX.decode
     case Map.get(action, "action") do
       "initialize" ->
-        dispatch(processor, :init_processor, [Map.get(action, "shardId"), output])
+        apply(processor, :init_processor, [Map.get(action, "shardId")])
       "processRecords" ->
-        dispatch(processor, :process_records, [Map.get(action, "records"), input, output])
+        apply(processor, :process_records, [Map.get(action, "records")])
       "shutdown" ->
-        dispatch(processor, :shutdown, [Map.get(action, "reason"), input, output])
+        apply(processor, :shutdown, [Map.get(action, "reason")])
       :else -> raise "Malformed Action"
     end
-    IO.puts(output, response(action))
-    read(processor, input, output, error)
-  end
-
-  defp dispatch(processor, function_name, args) do
-    apply(processor, function_name, args)
-  end
-
-  defp response(action = %{"action" => action_value}) do
-    ~s({"action":"status","responseFor":"#{action_value}"})
+    %{"action" => action_value} = action
+    IOProxy.write_action("status", %{responseFor: action_value})
+    read
   end
 end

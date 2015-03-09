@@ -1,17 +1,17 @@
 defmodule RecordProcessor do
-  def init_processor(_, _), do: nil
+  def init_processor(_), do: nil
   def process_records(_, _, _), do: nil
   def shutdown(_, _, _), do: nil
 
   defoverridable [
-    init_processor: 2,
+    init_processor: 1,
     process_records: 3,
     shutdown: 3
   ]
 
-  def checkpoint input, output, seq do
-    IO.puts(output, checkpoint_response(seq))
-    line = IO.read(input, :line)
+  def checkpoint seq do
+    IOProxy.write_action("checkpoint", %{checkpoint: seq})
+    line = IOProxy.read_line
     case JSX.decode(line) do
       {:ok, action} -> handle_action action
       {:error, error} -> {:error, error, line}
@@ -23,10 +23,5 @@ defmodule RecordProcessor do
       %{"action" => "checkpoint", "error" => error} -> {:error, error}
       _ -> :ok
     end
-  end
-
-  defp checkpoint_response value do
-    {:ok, json} = JSX.encode %{action: "checkpoint", checkpoint: value}
-    json
   end
 end

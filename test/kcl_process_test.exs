@@ -10,7 +10,8 @@ defmodule KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.run(RecordProcessor, input, output, error)
+        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -24,7 +25,8 @@ defmodule KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.run(RecordProcessor, input, output, error)
+        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -38,7 +40,8 @@ defmodule KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.run(RecordProcessor, input, output, error)
+        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -47,16 +50,16 @@ defmodule KCLProcessTest do
   defmodule TestRecordProcessor do
     import RecordProcessor
 
-    def process_records(records, input, output) do
+    def process_records(records) do
       seq = records |> List.first |> Map.get "sequenceNumber"
-      case checkpoint(input, output, seq) do
+      case checkpoint(seq) do
         :ok -> nil
-        {:error, "ThrottlingException"} -> checkpoint(input, output, seq)
+        {:error, "ThrottlingException"} -> checkpoint(seq)
       end
     end
 
-    def init_processor(arg, output), do: nil
-    def shutdown("TERMINATE", input, output), do: checkpoint(input, output, nil)
+    def init_processor(arg), do: nil
+    def shutdown("TERMINATE"), do: checkpoint(nil)
     def shutdown(_, _, _), do: nil
   end
 
@@ -72,7 +75,8 @@ defmodule KCLProcessTest do
 
     {input, output, error} = open_io input_string
 
-    KCLProcess.run(TestRecordProcessor, input, output, error)
+    KCLProcess.initialize(RecordProcessor, input, output, error)
+    KCLProcess.run
 
     # NOTE: The first checkpoint is expected to fail
     #       with a ThrottlingException and hence the

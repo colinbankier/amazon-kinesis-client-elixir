@@ -9,8 +9,8 @@ defmodule IOProxy do
   end
 
   def write_action(action_name, properties = %{}) do
-    {:ok, json} = Map.put(properties, "action", action_name)
-    |> JSX.encode
+    data = Enum.into(properties, [])
+    {:ok, json} = Keyword.put(data, :action, action_name) |> JSX.encode
     {_, output, _} = current_state
     IO.puts output, json
   end
@@ -37,7 +37,7 @@ defmodule IOProxy do
   end
 
   defp strip(line) when is_binary(line) do
-    String.replace line, ~r/\W|\n/, ""
+    String.replace line, ~r/\s/, ""
   end
   defp strip(line), do: line
 end
