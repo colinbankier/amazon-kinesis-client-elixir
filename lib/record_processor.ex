@@ -1,13 +1,9 @@
 defmodule RecordProcessor do
   def init_processor(_), do: nil
-  def process_records(_, _, _), do: nil
-  def shutdown(_, _, _), do: nil
+  def process_records(_), do: nil
+  def shutdown(_), do: nil
 
-  defoverridable [
-    init_processor: 1,
-    process_records: 3,
-    shutdown: 3
-  ]
+  defoverridable [init_processor: 1, process_records: 1, shutdown: 1]
 
   def checkpoint seq do
     IOProxy.write_action("checkpoint", %{checkpoint: seq})

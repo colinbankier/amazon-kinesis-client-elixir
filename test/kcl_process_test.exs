@@ -58,9 +58,8 @@ defmodule KCLProcessTest do
       end
     end
 
-    def init_processor(arg), do: nil
+    def init_processor(_), do: nil
     def shutdown("TERMINATE"), do: checkpoint(nil)
-    def shutdown(_, _, _), do: nil
   end
 
   test "It should process a normal stream of actions and produce expected output" do
@@ -75,7 +74,7 @@ defmodule KCLProcessTest do
 
     {input, output, error} = open_io input_string
 
-    KCLProcess.initialize(RecordProcessor, input, output, error)
+    KCLProcess.initialize(TestRecordProcessor, input, output, error)
     KCLProcess.run
 
     # NOTE: The first checkpoint is expected to fail
