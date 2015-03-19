@@ -1,4 +1,4 @@
-defmodule KclexTest do
+defmodule Kcl.KclexTest do
   use ExUnit.Case
 
   test "the truth" do

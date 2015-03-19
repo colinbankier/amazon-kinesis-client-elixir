@@ -1,4 +1,4 @@
-defmodule IOProxy do
+defmodule Kcl.IOProxy do
   def initialize io_streams = {_input, _output, _error} do
     Agent.start_link(fn -> io_streams end, name: __MODULE__)
   end

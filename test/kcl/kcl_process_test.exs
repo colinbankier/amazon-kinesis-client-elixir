@@ -1,5 +1,8 @@
-defmodule KCLProcessTest do
+defmodule Kcl.KCLProcessTest do
   use ExUnit.Case
+  alias Kcl.KCLProcess
+  alias Kcl.RecordProcessor
+  alias Kcl.IOProxy
   import TestHelper
 
   test "It should respond to init_processor and output a status message" do

@@ -1,4 +1,6 @@
-defmodule RecordProcessor do
+defmodule Kcl.RecordProcessor do
+  alias Kcl.IOProxy
+
   def init_processor(_), do: nil
   def process_records(_), do: nil
   def shutdown(_), do: nil
