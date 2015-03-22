@@ -1,6 +1,6 @@
 defmodule Kcl.ExecutorCommandBuilderTest do
   use ExUnit.Case
-  @properties_file_path __DIR__
+  @properties_file_path Path.join(__DIR__, "test.properties")
 
   test "java command with env variable set" do
     System.put_env "PATH_TO_JAVA", "my_java"
@@ -31,5 +31,44 @@ defmodule Kcl.ExecutorCommandBuilderTest do
     command = Kcl.ExecutorCommandBuilder.build @properties_file_path
 
     assert command |> Enum.at(1) == "-cp"
+  end
+
+  test "command classpath" do
+    classpath = Kcl.ExecutorCommandBuilder.build(@properties_file_path)
+    |> Enum.at(2)
+
+    assert String.match? classpath, ~r/\A(.+\.jar\:)+.+\z/
+    assert String.contains? classpath, Path.dirname(@properties_file_path)
+  end
+
+  test "command client_class" do
+    client_class = Kcl.ExecutorCommandBuilder.build(@properties_file_path)
+    |> Enum.at(3)
+
+    assert client_class == "com.amazonaws.services.kinesis.multilang.MultiLangDaemon"
+  end
+
+  test "command basename" do
+    basename = Kcl.ExecutorCommandBuilder.build(@properties_file_path)
+    |> Enum.at(4)
+
+    assert basename == Path.basename(@properties_file_path)
+  end
+
+  test "with system properties" do
+    system_properties = %{
+      "log4j.configuration" => "log4j.properties",
+      option2: "test"
+    }
+
+  command = Kcl.ExecutorCommandBuilder.build(
+    @properties_file_path,
+    system_properties
+  )
+
+  assert Enum.find(command,
+  &(&1 == "-Dlog4j.configuration=log4j.properties"))
+  assert Enum.find(command,
+  &(&1 == "-Doption2=test"))
   end
 end
