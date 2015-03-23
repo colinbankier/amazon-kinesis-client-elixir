@@ -56,19 +56,18 @@ defmodule Kcl.ExecutorCommandBuilderTest do
   end
 
   test "with system properties" do
-    system_properties = %{
-      "log4j.configuration" => "log4j.properties",
-      option2: "test"
-    }
+    system_properties = %{"log4j.configuration" => "log4j.properties", option2: "test"}
 
-  command = Kcl.ExecutorCommandBuilder.build(
-    @properties_file_path,
-    system_properties
-  )
+    command = Kcl.ExecutorCommandBuilder.build(@properties_file_path, system_properties)
 
-  assert Enum.find(command,
-  &(&1 == "-Dlog4j.configuration=log4j.properties"))
-  assert Enum.find(command,
-  &(&1 == "-Doption2=test"))
+    assert Enum.find(command, &(&1 == "-Dlog4j.configuration=log4j.properties"))
+    assert Enum.find(command, &(&1 == "-Doption2=test"))
+  end
+
+  test "with extra_class_path" do
+    classpath = Kcl.ExecutorCommandBuilder.build(@properties_file_path, [], ["test.jar"])
+    |> Enum.at(2)
+
+    assert String.contains? classpath, "test.jar"
   end
 end

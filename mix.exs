@@ -27,6 +27,7 @@ defmodule Kclex.Mixfile do
   defp deps do
     [
       { :exjsx, github: "talentdeficit/exjsx" },
+      { :inflex, "~> 1.0.0" },
     ]
   end
 end

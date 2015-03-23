@@ -1,2 +1,3 @@
 %{"exjsx": {:git, "git://github.com/talentdeficit/exjsx.git", "d3572b488f10e3b83fadb1fc595fc87f84c35809", []},
+  "inflex": {:hex, :inflex, "1.0.0"},
   "jsx": {:hex, :jsx, "2.4.0"}}
