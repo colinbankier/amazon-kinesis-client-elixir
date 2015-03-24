@@ -26,8 +26,9 @@ defmodule Kclex.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      { :exjsx, github: "talentdeficit/exjsx" },
-      { :inflex, "~> 1.0.0" },
+      {:exjsx, "~> 3.1.0"},
+      {:inflex, "~> 1.0.0"},
+      {:radpath, "~> 0.0.5"},
     ]
   end
 end
