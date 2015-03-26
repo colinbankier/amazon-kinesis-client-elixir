@@ -63,6 +63,7 @@ defmodule Kcl.KCLProcessTest do
 
   defmodule DefaultRecordProcessor do
     @moduledoc """
+      Uses default checkpointing behaviour of RecordProcessor module.
     """
     use RecordProcessor
 
