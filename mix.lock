@@ -1,8 +1,10 @@
-%{"excoveralls": {:hex, :excoveralls, "0.3.8"},
+%{"ex_doc": {:git, "git://github.com/elixir-lang/ex_doc.git", "c5d80b1278bf55dcfe1216cb412f6d96b18b1616", []},
+  "excoveralls": {:hex, :excoveralls, "0.3.8"},
   "exjsx": {:hex, :exjsx, "3.1.0"},
   "hackney": {:hex, :hackney, "1.0.6"},
   "idna": {:hex, :idna, "1.0.2"},
   "inflex": {:hex, :inflex, "1.0.0"},
   "jsx": {:hex, :jsx, "2.4.0"},
   "radpath": {:hex, :radpath, "0.0.5"},
-  "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.1"}}
+  "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.1"},
+  "tempfile": {:git, "git://github.com/lowks/tempfile.git", "c076978da38536fba89fb9ec9db6067b31b32120", []}}

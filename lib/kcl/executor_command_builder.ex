@@ -21,6 +21,7 @@ defmodule Kcl.ExecutorCommandBuilder do
     end
   end
 
+  defp system_property_options(nil), do: nil
   defp system_property_options system_properties do
     Enum.map system_properties, fn {key, value} ->
       "-D#{key}=#{value}"
@@ -30,6 +31,7 @@ defmodule Kcl.ExecutorCommandBuilder do
   defp classpath properties_file_path, extra_class_path do
     File.ls!(jar_dir)
     |> Enum.filter(&(String.ends_with?(&1, ".jar")))
+    |> Enum.map(&(Path.join(jar_dir, &1)))
     |> Enum.concat(extra_class_path)
     |> Enum.concat(properties_file_dir(properties_file_path))
     |> Enum.join(":")

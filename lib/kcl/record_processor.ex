@@ -5,7 +5,11 @@ defmodule Kcl.RecordProcessor do
   def process_records(_), do: nil
   def shutdown(_), do: nil
 
-  defoverridable [init_processor: 1, process_records: 1, shutdown: 1]
+  def run do
+    IO.puts "process this"
+  end
+
+  defoverridable [init_processor: 1, process_records: 1, shutdown: 1, run: 0]
 
   def checkpoint seq do
     IOProxy.write_action("checkpoint", %{checkpoint: seq})

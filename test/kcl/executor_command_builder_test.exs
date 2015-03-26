@@ -37,7 +37,7 @@ defmodule Kcl.ExecutorCommandBuilderTest do
     classpath = Kcl.ExecutorCommandBuilder.build(@properties_file_path)
     |> Enum.at(2)
 
-    assert String.match? classpath, ~r/\A(.+\.jar\:)+.+\z/
+    assert String.match? classpath, ~r{\A/(.+\.jar\:)+.+\z}
     assert String.contains? classpath, Path.dirname(@properties_file_path)
   end
 

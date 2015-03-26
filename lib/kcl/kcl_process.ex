@@ -1,7 +1,7 @@
 defmodule Kcl.KCLProcess do
   alias Kcl.IOProxy
 
-  def initialize(processor_module, input \\ :stdin, output \\ :stdout, error \\ :stderr) do
+  def initialize(processor_module, input \\ :stdio, output \\ :stdio, error \\ :stderr) do
     IOProxy.initialize({input, output, error})
     Agent.start_link(fn -> processor_module end, name: __MODULE__)
   end
