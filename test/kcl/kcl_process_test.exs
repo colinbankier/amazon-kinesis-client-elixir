@@ -5,6 +5,17 @@ defmodule Kcl.KCLProcessTest do
   alias Kcl.IOProxy
   import TestHelper
 
+  defmodule DoNothingRecordProcessor do
+    @moduledoc """
+      Overrides default RecordProcessor functions to prevent checkpointing
+      to allow testing of basic message handling.
+    """
+    use RecordProcessor
+
+    def process_records(data), do: nil
+    def shutdown(args), do: nil
+  end
+
   test "It should respond to init_processor and output a status message" do
         input_spec = %{
           :method => :init_processor,
@@ -13,7 +24,7 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
         KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
@@ -28,7 +39,7 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
         KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
@@ -43,26 +54,21 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(RecordProcessor, input, output, error)
+        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
         KCLProcess.run
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
   end
 
-  defmodule TestRecordProcessor do
-    import RecordProcessor
+  defmodule DefaultRecordProcessor do
+    @moduledoc """
+    """
+    use RecordProcessor
 
-    def process_records(records) do
-      seq = records |> List.first |> Map.get "sequenceNumber"
-      case checkpoint(seq) do
-        :ok -> nil
-        {:error, "ThrottlingException"} -> checkpoint(seq)
-      end
+    def process_record data do
+
     end
-
-    def init_processor(_), do: nil
-    def shutdown("TERMINATE"), do: checkpoint(nil)
   end
 
   test "It should process a normal stream of actions and produce expected output" do
@@ -77,7 +83,7 @@ defmodule Kcl.KCLProcessTest do
 
     {input, output, error} = open_io input_string
 
-    KCLProcess.initialize(TestRecordProcessor, input, output, error)
+    KCLProcess.initialize(DefaultRecordProcessor, input, output, error)
     KCLProcess.run
 
     # NOTE: The first checkpoint is expected to fail
