@@ -24,8 +24,7 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
-        KCLProcess.run
+        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -39,8 +38,7 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
-        KCLProcess.run
+        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -54,8 +52,7 @@ defmodule Kcl.KCLProcessTest do
         }
         {input, output, error} = open_io(input_spec[:input])
 
-        KCLProcess.initialize(DoNothingRecordProcessor, input, output, error)
-        KCLProcess.run
+        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
         |> assert_io input, output, error
@@ -84,8 +81,7 @@ defmodule Kcl.KCLProcessTest do
 
     {input, output, error} = open_io input_string
 
-    KCLProcess.initialize(DefaultRecordProcessor, input, output, error)
-    KCLProcess.run
+    KCLProcess.run(DefaultRecordProcessor, input, output, error)
 
     # NOTE: The first checkpoint is expected to fail
     #       with a ThrottlingException and hence the

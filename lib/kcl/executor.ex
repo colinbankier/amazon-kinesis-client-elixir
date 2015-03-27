@@ -11,11 +11,6 @@ defmodule Kcl.Executor do
       System.cmd(command, args)
   end
 
-  def process processor do
-    Kcl.KCLProcess.initialize processor
-    Kcl.KCLProcess.run
-  end
-
   defp config_properties_path config do
     properties = Kcl.Configuration.properties config
     path = Radpath.mktempfile

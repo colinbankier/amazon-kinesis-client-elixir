@@ -1,21 +1,17 @@
 defmodule Kcl.KCLProcess do
   alias Kcl.IOProxy
 
-  def initialize(processor_module, input \\ :stdio, output \\ :stdio, error \\ :stderr) do
+  def run(processor, input \\ :stdio, output \\ :stdio, error \\ :stderr) do
     IOProxy.initialize({input, output, error})
-    Agent.start_link(fn -> processor_module end, name: __MODULE__)
+    process processor
   end
 
-  def run do
-    IOProxy.read_line |> process_line
+  defp process processor do
+    IOProxy.read_line |> process_line(processor)
   end
 
-  defp processor do
-    Agent.get(__MODULE__, &(&1))
-  end
-
-  defp process_line(nil), do: nil
-  defp process_line(line) do
+  defp process_line(nil, _), do: nil
+  defp process_line(line, processor) do
     {:ok, action} = line |> JSX.decode
     case Map.get(action, "action") do
       "initialize" ->
@@ -28,6 +24,6 @@ defmodule Kcl.KCLProcess do
     end
     %{"action" => action_value} = action
     IOProxy.write_action("status", %{responseFor: action_value})
-    run
+    process processor
   end
 end
