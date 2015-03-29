@@ -22,12 +22,12 @@ defmodule Kcl.KCLProcessTest do
           :action => "initialize",
           :input => ~s({"action":"initialize","shardId":"shard-000001"})
         }
-        {input, output, error} = open_io(input_spec[:input])
+        io = open_io(input_spec[:input])
 
-        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
+        KCLProcess.run(DoNothingRecordProcessor, io)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
-        |> assert_io input, output, error
+        |> assert_io io
   end
 
   test "It should respond to process_shards and output a status message" do
@@ -36,12 +36,12 @@ defmodule Kcl.KCLProcessTest do
           :action => "processRecords",
           :input => ~s({"action":"processRecords","records":[]})
         }
-        {input, output, error} = open_io(input_spec[:input])
+        io = open_io(input_spec[:input])
 
-        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
+        KCLProcess.run(DoNothingRecordProcessor, io)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
-        |> assert_io input, output, error
+        |> assert_io io
   end
 
   test "It should respond to shutdown and output a status message" do
@@ -50,12 +50,12 @@ defmodule Kcl.KCLProcessTest do
           :action => "shutdown",
           :input => ~s({"action":"shutdown","reason":"TERMINATE"})
         }
-        {input, output, error} = open_io(input_spec[:input])
+        io = open_io(input_spec[:input])
 
-        KCLProcess.run(DoNothingRecordProcessor, input, output, error)
+        KCLProcess.run(DoNothingRecordProcessor, io)
 
         ~s({"action":"status","responseFor":"#{input_spec[:action]}"})
-        |> assert_io input, output, error
+        |> assert_io io
   end
 
   defmodule DefaultRecordProcessor do
@@ -79,9 +79,9 @@ defmodule Kcl.KCLProcessTest do
     {"action":"checkpoint","checkpoint":"456"}
     """
 
-    {input, output, error} = open_io input_string
+    io = open_io input_string
 
-    KCLProcess.run(DefaultRecordProcessor, input, output, error)
+    KCLProcess.run(DefaultRecordProcessor, io)
 
     # NOTE: The first checkpoint is expected to fail
     #       with a ThrottlingException and hence the
@@ -94,10 +94,10 @@ defmodule Kcl.KCLProcessTest do
     {"action":"checkpoint","checkpoint":null}
     {"action":"status","responseFor":"shutdown"}
     """
-    assert_io expected_output_string, input, output, error
+    assert_io expected_output_string, io
   end
 
-  def assert_io expected_output, input, output, error do
+  def assert_io expected_output, [input: input, output: output, error: error] do
     assert clean(content(output)) == clean(expected_output)
     assert content(error) == ""
     assert IO.read(input, 1) == :eof

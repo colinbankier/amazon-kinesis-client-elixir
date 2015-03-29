@@ -1,8 +1,20 @@
 defmodule Kcl.KCLProcess do
   alias Kcl.IOProxy
 
-  def run(processor, input \\ :stdio, output \\ :stdio, error \\ :stderr) do
-    IOProxy.initialize({input, output, error})
+  @default_options [
+    input: :stdio,
+    output: :stdio,
+    error: :stderr,
+    sleep_seconds: 5,
+    checkpoint_retries: 5,
+    checkpoint_freq_seconds: 60
+  ]
+
+  def run(processor, options \\ @default_options) do
+    options = Dict.merge(@default_options, options)
+    options |> Dict.take([:input, :output, :error])
+    |> IOProxy.initialize
+
     process processor
   end
 

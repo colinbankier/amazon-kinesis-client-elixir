@@ -5,7 +5,7 @@ defmodule TestHelper do
     {:ok, input} = StringIO.open(input_content)
     {:ok, output} = StringIO.open ""
     {:ok, error} = StringIO.open ""
-    {input, output, error}
+    [input: input, output: output, error: error]
   end
 
   def content stringio do
