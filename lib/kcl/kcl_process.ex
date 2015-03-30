@@ -5,9 +5,6 @@ defmodule Kcl.KCLProcess do
     input: :stdio,
     output: :stdio,
     error: :stderr,
-    sleep_seconds: 5,
-    checkpoint_retries: 5,
-    checkpoint_freq_seconds: 60
   ]
 
   def run(processor, options \\ @default_options) do
