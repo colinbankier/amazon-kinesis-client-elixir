@@ -10,6 +10,14 @@ defmodule Kcl.RecordProcessorTest do
     def process_record(data), do: "I got #{data}"
   end
 
+  defmodule BrokenProcessor do
+    use Kcl.RecordProcessor
+
+    def process_record data do
+      raise "oops"
+    end
+  end
+
   setup do
     :ok
   end
@@ -51,13 +59,6 @@ defmodule Kcl.RecordProcessorTest do
   test "forces checkpoint with largest_seq on error" do
     io = open_io
     IOProxy.initialize io
-    defmodule BrokenProcessor do
-      use Kcl.RecordProcessor
-        
-      def process_record data do
-        raise "oops"
-      end
-    end
 
     records = [create_record("Break me")]
     BrokenProcessor.initialize [largest_seq: 1234]
@@ -66,4 +67,35 @@ defmodule Kcl.RecordProcessorTest do
     assert content(io[:output]) == "{\"action\":\"checkpoint\",\"checkpoint\":1234}\n"
   end
 
+  test "checkpoints on shutdown terminate" do
+    io = open_io
+    IOProxy.initialize io
+
+    MyProcessor.shutdown "TERMINATE"
+
+    assert content(io[:output]) == "{\"action\":\"checkpoint\",\"checkpoint\":null}\n"
+  end
+
+  test "does not checkpoint if shutdown for other reason" do
+    io = open_io
+    IOProxy.initialize io
+
+    MyProcessor.shutdown "FOO"
+
+    assert content(io[:output]) == ""
+  end
+
+  test "checkpoint retries specified number of times" do
+    io = open_io
+    IOProxy.initialize io
+    MyProcessor.initialize checkpoint_retries: 3, largest_seq: 321
+
+    BrokenProcessor.process_records [create_record("Force checkpoint")]
+
+    assert content(io[:output]) == """
+    {\"action\":\"checkpoint\",\"checkpoint\":321}
+    {\"action\":\"checkpoint\",\"checkpoint\":321}
+    {\"action\":\"checkpoint\",\"checkpoint\":321}
+    """
+  end
 end

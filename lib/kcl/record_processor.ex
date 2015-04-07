@@ -1,6 +1,7 @@
 defmodule Kcl.RecordProcessor do
   alias Kcl.IOProxy
   use Timex
+  require Logger
   @default_options [
     sleep_seconds: 5,
     checkpoint_retries: 5,
@@ -55,7 +56,17 @@ defmodule Kcl.RecordProcessor do
       end
 
       def process_record(data), do: data
-      def shutdown("TERMINATE"), do: checkpoint(nil)
+
+      def shutdown("TERMINATE") do
+        Logger.info "Terminating, will attempt to checkpoint."
+        checkpoint(nil)
+      end
+
+      def shutdown(_) do
+        Logger.info "Shutting down due to failover, will not checkpoint."
+        nil
+      end
+
       defoverridable [init_processor: 1, process_records: 1, shutdown: 1, process_record: 1]
     end
   end
@@ -114,11 +125,20 @@ defmodule Kcl.RecordProcessor do
   end
 
   def checkpoint seq do
+    try_checkpoint seq, Dict.get(state, :checkpoint_retries)
+  end
+
+  def try_checkpoint(seq, attempts_remaining) when attempts_remaining <= 0 do
+    Logger.error "Failed to checkpoint. Giving up."
+    {:error, "CheckpointFailed"}
+  end
+
+  def try_checkpoint seq, attempts_remaining do
     IOProxy.write_action("checkpoint", %{checkpoint: seq})
     line = IOProxy.read_line
     case JSX.decode(line) do
       {:ok, action} -> handle_action action
-      {:error, error} -> {:error, error, line}
+      {:error, error} -> try_checkpoint seq, attempts_remaining - 1
     end
   end
 
