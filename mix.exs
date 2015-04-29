@@ -13,7 +13,7 @@ defmodule Kclex.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :porcelain]]
   end
 
   # Dependencies can be Hex packages:
@@ -32,6 +32,7 @@ defmodule Kclex.Mixfile do
       {:radpath, "~> 0.0.5"},
       {:tempfile, github: "lowks/tempfile"},
       {:timex, "~> 0.13.4"},
+      {:porcelain, "~> 2.0"},
     ]
   end
 end

@@ -1,6 +1,22 @@
 defmodule Kcl.Executor do
   require Logger
-  def run config do
+  use GenServer
+
+  def start_link options do
+    GenServer.start(__MODULE__, options)
+  end
+
+  def run options do
+    start_link options
+  end
+
+  def init options do
+    pid = execute(options)
+    Logger.info "Executor spawned #{inspect pid}"
+    {:ok, pid}
+  end
+
+  def execute config do
       [command | args] = Kcl.ExecutorCommandBuilder.build(
         config_properties_path(config),
         system_properties,
@@ -8,7 +24,13 @@ defmodule Kcl.Executor do
       )
       Logger.info "execute command:\n#{command} #{Enum.join args, " "}"
 
-      System.cmd(command, args)
+      # Porcelain.spawn(command, args)
+      Porcelain.spawn_shell "while 1; do sleep 1; echo looping; done"
+  end
+
+  def terminate(reason, proc) do
+    Logger.info "Executor terminating: #{inspect reason}"
+    # Porcelain.Process.stop proc
   end
 
   defp config_properties_path config do

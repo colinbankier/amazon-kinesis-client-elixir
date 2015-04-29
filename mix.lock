@@ -5,6 +5,7 @@
   "idna": {:hex, :idna, "1.0.2"},
   "inflex": {:hex, :inflex, "1.0.0"},
   "jsx": {:hex, :jsx, "2.4.0"},
+  "porcelain": {:hex, :porcelain, "2.0.0"},
   "radpath": {:hex, :radpath, "0.0.5"},
   "ssl_verify_hostname": {:hex, :ssl_verify_hostname, "1.0.1"},
   "tempfile": {:git, "git://github.com/lowks/tempfile.git", "c076978da38536fba89fb9ec9db6067b31b32120", []},
