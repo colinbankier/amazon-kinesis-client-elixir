@@ -51,7 +51,7 @@ defmodule Kcl.RecordProcessor do
         update fn state ->
           state
           |> Dict.put(:largest_seq, nil)
-          |> Dict.put(:last_checkpoint_time, Date.epoch(:secs))
+          |> Dict.put(:last_checkpoint_time, current_time)
         end
       end
 
@@ -108,12 +108,16 @@ defmodule Kcl.RecordProcessor do
   end
 
   def check_checkpoint force_checkpoint do
-    if (Date.epoch(:secs) - last_checkpoint_time > state[:checkpoint_freq_seconds]) || force_checkpoint do
+    if (current_time - last_checkpoint_time > state[:checkpoint_freq_seconds]) || force_checkpoint do
       checkpoint state[:largest_seq]
       update fn state ->
-        Dict.put state, :last_checkpoint_time, Date.epoch(:secs)
+        Dict.put state, :last_checkpoint_time, current_time
       end
     end
+  end
+
+  def current_time do
+    Date.now |> Date.convert(:secs)
   end
 
   def last_checkpoint_time do
@@ -134,6 +138,7 @@ defmodule Kcl.RecordProcessor do
   end
 
   def try_checkpoint seq, attempts_remaining do
+    Logger.info "Attempting checkpoint with #{attempts_remaining} attempts remaining."
     IOProxy.write_action("checkpoint", %{checkpoint: seq})
     line = IOProxy.read_line
     case JSX.decode(line) do
