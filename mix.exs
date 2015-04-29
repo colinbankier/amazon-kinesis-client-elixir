@@ -5,6 +5,7 @@ defmodule Kclex.Mixfile do
     [app: :kclex,
      version: "0.0.1",
      elixir: "~> 1.0",
+     description: "An amazon kinesis KCL client for elixir.",
      deps: deps]
   end
 
