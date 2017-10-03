@@ -19,3 +19,7 @@ Run sample client:
 Put records into stream
 `aws kinesis put-record --stream-name "test" --region us-east-1 --profile colinb-sandbox --data "My Record" --partition-key 1`
 
+# License
+The source code in this project, not including 3rd party JAR files, is licensed under the Apache License V2.
+
+[LICENSE-2.0.txt](./LICENSE-2.0.txt)
